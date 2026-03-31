@@ -13,31 +13,35 @@ public class ParticipantService {
         participantRepository = new ParticipantRepository();
     }
 
-    public boolean createParticipant(Participant participant) {
-
-        return participantRepository.createParticipant(participant);
+    public int createParticipant(Participant participant) {
+        return participantRepository.createOrGetParticipant(
+                participant.getName(),
+                participant.getEmail()
+        );
     }
 
     public boolean registerParticipant(int eventId, Participant participant) {
 
-        boolean created = participantRepository.createParticipant(participant);
-
-        if (!created) return false;
-
-        return participantRepository.registerParticipant(
-                eventId,
-                participant.getParticipantId()
+        // 🔥 Get correct participant ID (existing or new)
+        int participantId = participantRepository.createOrGetParticipant(
+                participant.getName(),
+                participant.getEmail()
         );
+
+        if (participantId == -1) {
+            System.out.println("Participant creation failed");
+            return false;
+        }
+
+        // ✅ Use correct ID (NOT participant.getParticipantId())
+        return participantRepository.registerParticipant(eventId, participantId);
     }
 
     public List<Participant> getParticipants(int eventId) {
-
         return participantRepository.getParticipantsByEvent(eventId);
     }
 
     public boolean removeParticipant(int eventId, int participantId) {
-
-        // simplified logic
         System.out.println("Remove logic can be added later.");
         return true;
     }
